@@ -20,7 +20,7 @@ class NominationTestCase(TestCase):
         """
         nomination1 = NominationFactory()
 
-        end_of_last_month = Nomination.created.replace(day=1) - timedelta(days=1)
+        end_of_last_month = nomination1.created.replace(day=1) - timedelta(days=1)
 
         expected_nominations = [
             nomination1,

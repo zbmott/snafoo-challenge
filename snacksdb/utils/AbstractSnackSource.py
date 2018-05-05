@@ -12,5 +12,5 @@ class AbstractSnackSource(object):
     def list(self):
         raise NotImplementedError()
 
-    def suggest(self, suggestion):
+    def suggest(self, name, location, latitude=None, longitude=None):
         raise NotImplementedError()

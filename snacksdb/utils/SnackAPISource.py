@@ -17,16 +17,14 @@ class SnackAPISource(AbstractSnackSource):
     See Snack Food API docs for more information:
     https://api-snacks.nerdery.com/v1/help/
     """
+    DEFAULT_API_BASE = 'https://api-snacks.nerderylabs.com/v1'
     LIST_PATH = '/snacks'
     SUGGEST_PATH = '/snacks'
 
     def __init__(self, api_key=None, api_base=None):
         self.api_key = api_key or settings.SNACK_BACKEND_API_KEY
-        self.api_base = api_base or getattr(
-            settings,
-            'SNACK_BACKEND_API_BASE',
-            'https://api-snacks.nerderylabs.com/v1'
-        )
+        self.api_base = api_base or getattr(settings, 'SNACK_BACKEND_API_BASE', None)
+        self.api_base = self.api_base or self.DEFAULT_API_BASE
 
     @cached_property
     def headers(self):
@@ -64,10 +62,10 @@ class SnackAPISource(AbstractSnackSource):
 
         # Handle status codes described in the documentation:
         # https://api-snacks.nerderylabs.com/v1/help/api/post-snacks.
-        if response.status_code == 401:
-            raise SnackSourceException(_('Access denied to Snack API. Check the API key.'))
-        elif response.status_code == 400:
+        if response.status_code == 400:
             raise SnackSourceException(_('Malformed suggestion submitted to Snack API.'))
+        elif response.status_code == 401:
+            raise SnackSourceException(_('Access denied to Snack API. Check the API key.'))
         elif response.status_code == 409:
             raise SnackSourceException(_('Error: That snack already exists!'))
         elif response.status_code != 200:
