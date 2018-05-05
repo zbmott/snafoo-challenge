@@ -48,8 +48,8 @@ class NominationForm(forms.Form):
         cleaned_data = super().clean()
 
         # It's invalid to have latitude without longitude, and vice-versa.
-        have_latitude = isinstance(cleaned_data['latitude'], D)
-        have_longitude = isinstance(cleaned_data['longitude'], D)
+        have_latitude = isinstance(cleaned_data.get('latitude'), D)
+        have_longitude = isinstance(cleaned_data.get('longitude'), D)
 
         if xor(have_latitude, have_longitude):
             msg = _('Latitude and longitude must be either both provided or both omitted.')
