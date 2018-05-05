@@ -1,0 +1,29 @@
+{% extends 'snacksdb/base.html' %}
+{% load i18n %}
+
+{% block content %}
+<div class="container">
+  <div class="row">
+    <div class="col-md-6 col-mid-offset-3">
+      {% if unnominated_snacks %}
+        <h2>{% trans 'Nominate an existing snack' %}</h2>
+        <form method="post">
+          {% csrf_token %}
+          <div class="form-group">
+            <select class="form-control" name="snack_id">
+              <option selected disabled>{% trans 'Pick a snack' %}</option>
+              {% for snack in unnominated_snacks %}
+                <option value="{{ snack.id }}{{ delimiter }}{{ snack.name }}">{{ snack.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <button class="btn btn-success">{% trans 'Nominate' %}</button>
+        </form>
+      {% endif %}
+
+      <h2 {% if unnominated_snacks %}style="margin-top: 2em;"{% endif %}>{% trans 'Nominate a new snack' %}</h2>
+      {% include 'snacksdb/partials/form.html' with form=form method='post' %}
+    </div>
+  </div>
+</div>
+{% endblock content %}

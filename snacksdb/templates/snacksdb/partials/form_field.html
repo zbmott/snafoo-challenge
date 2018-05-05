@@ -1,0 +1,11 @@
+{% load widget_tweaks %}
+<div class="form-group {% if field.errors %}has-error{% endif %}">
+  {{ field.label_tag }}
+  {% if field.help_text %}<p class="form-text text-muted">{{ field.help_text }}</p>{% endif %}
+  {% render_field field class+="form-control" %}
+  {% if field.errors %}
+    {% for error in field.errors %}
+      <span class="help-block">{{ error|escape }}</span>
+    {% endfor %}
+  {% endif %}
+</div>

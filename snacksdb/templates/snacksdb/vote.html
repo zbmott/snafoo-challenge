@@ -1,0 +1,94 @@
+{% extends 'snacksdb/base.html' %}
+{% load i18n %}
+
+{% block content %}
+  <div class="container">
+    <div class="row">
+      <div class="col-md-6">
+        <h2>{% trans 'Mandatory snacks' %}</h2>
+        <table class="table table-bordered">
+          <caption>{% trans "These snacks are always purchased." %}</caption>
+          <thead>
+            <tr>
+              <th>{% trans 'ID' %}</th>
+              <th>{% trans 'Name' %}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for snack in mandatory_snacks %}
+              <tr>
+                <td>{{ snack.id }}</td>
+                <td>{{ snack.name }}</td>
+              </tr>
+            {% empty %}
+              <tr>
+                <td colspan="2">{% trans 'No mandatory snacks to show.' %}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <div class="col-md-6">
+        <h2>{% trans 'Optional snacks' %}</h2>
+        <table id="optional-snacks" class="table table-bordered">
+          <caption>{% trans "Snacks you can vote on if you're so inclined." %}</caption>
+          <thead>
+            <tr>
+              <th>{% trans 'ID' %}</th>
+              <th>{% trans 'Name' %}</th>
+              <th>{% trans 'Last purchased' %}</th>
+              <th>{% trans 'Votes' %}</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for snack in optional_snacks %}
+              <tr>
+                <td>{{ snack.id }}</td>
+                <td>{{ snack.name }}</td>
+                <td>{{ snack.lastPurchaseDate|default:'(never purchased)' }}</td>
+                <td>{{ snack.total_votes }}</td>
+                <td style="text-align: center;">
+                  <form method='post'>
+                    {% csrf_token %}
+                    <input type="hidden" name="snack_id" value="{{ snack.id }}" />
+                    <input type="hidden" name="snack_name" value="{{ snack.name }}" />
+                    <button class="btn btn-success" {% if votes_remaining < 1 %}disabled{% endif %}>
+                      {% trans 'Vote' %}
+                    </button>
+                  </form>
+                </td>
+              </tr>
+              {% if forloop.last and nominations_remaining > 0 %}
+                <tr>
+                  <td colspan="5" style="text-align: center;">
+                    <a href="{% url 'snacksdb:nominate' %}">{% trans 'Nominate another snack!' %}</a>
+                  </td>
+                </tr>
+              {% endif %}
+            {% empty %}
+              <tr>
+                <td colspan="5">
+                  {% trans 'No snacks have been nominated yet.' %}
+                  {% if nominations_remaining > 0 %}
+                    <a href="{% url 'snacksdb:nominate' %}">{% trans 'Nominate a snack!' %}</a>
+                  {% endif %}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        <p>
+          {% blocktrans with votes_remaining=votes_remaining %}
+            You have {{ votes_remaining }} vote(s) remaining this month.
+          {% endblocktrans %}
+        </p>
+        <p>
+          {% blocktrans with nominations_remaining=nominations_remaining %}
+            You have {{ nominations_remaining }} nomination(s) remaining this month.
+          {% endblocktrans %}
+        </p>
+      </div>
+    </div>
+  </div>
+{% endblock content %}
