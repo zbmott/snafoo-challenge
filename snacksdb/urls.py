@@ -2,7 +2,7 @@
 
 __author__ = 'zach.mott@gmail.com'
 
-from django.urls import re_path
+from django.urls import include, path, re_path
 
 from snacksdb import views
 

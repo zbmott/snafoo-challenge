@@ -3,7 +3,9 @@
 __author__ = 'zach.mott@gmail.com'
 
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect
+from django.utils.decorators import method_decorator
 from django.utils.translation import ugettext_lazy as _
 from django.views.generic import FormView
 
@@ -12,6 +14,7 @@ from snacksdb.models import Nomination
 from snacksdb.utils import get_snack_source, SnackSourceException
 
 
+@method_decorator(login_required, name='dispatch')
 class Nominate(FormView):
     FormView = FormView  # Preserve reference for mocking during tests.
     DELIMITER = '--DELIM--'

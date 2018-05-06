@@ -88,6 +88,10 @@
             You have {{ nominations_remaining }} nomination(s) remaining this month.
           {% endblocktrans %}
         </p>
+        <p>
+          {% trans 'All done with snacks?' %}
+          <a href="{% url 'logout' %}?next={% url 'snacksdb:vote' %}">{% trans 'Log out!' %}</a>
+        </p>
       </div>
     </div>
   </div>

@@ -7,8 +7,10 @@ from operator import itemgetter
 from django.db.models import Count
 from django.conf import settings
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseBadRequest, HttpResponseForbidden
 from django.shortcuts import redirect
+from django.utils.decorators import method_decorator
 from django.utils.translation import ugettext_lazy as _
 from django.views import generic
 
@@ -16,6 +18,7 @@ from snacksdb.models import Ballot, Nomination
 from snacksdb.utils import get_snack_source, SnackSourceException
 
 
+@method_decorator(login_required, name='dispatch')
 class Vote(generic.TemplateView):
     template_name = 'snacksdb/vote.html'
 
