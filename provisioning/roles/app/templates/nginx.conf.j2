@@ -1,0 +1,44 @@
+log_format access '$remote_addr ($http_x_forwarded_for) - $remote_user [$time_local] '
+                  '$http_host "$request" $status $bytes_sent '
+                  '"$http_referer" "$http_user_agent" "$request_time"';
+
+upstream {{ app_name }}_server {
+  server unix:/home/{{ app_name }}/run/gunicorn.sock fail_timeout=0;
+}
+
+server {
+  listen 80 default;
+  client_max_body_size 256M;
+  server_name
+{% for name in app_nginx_server_names %}
+               {{ name }}{% if loop.last %};{% endif %}
+
+{% endfor %}
+
+  access_log /home/{{ app_name }}/logs/nginx.access.log access;
+  error_log /home/{{ app_name }}/logs/nginx.error.log info;
+
+  location /static {
+    alias {{ app_root }}/static/;
+  }
+
+  location / {
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header Host $http_host;
+    proxy_redirect off;
+
+    # If the requested path isn't a static file, proxy the request
+    # to Django for handling.
+    if (!-f $request_filename) {
+      proxy_pass http://{{ app_name }}_server;
+      break;
+    }
+  }
+
+  # Error pages
+  error_page 500 502 503 504 /500.html;
+  location = /500.html {
+    root {{ app_root }}/static/;
+  }
+}

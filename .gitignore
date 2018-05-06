@@ -2,3 +2,4 @@
 *.sqlite3
 local_settings.py
 __pycache__
+provisioning/keys/*

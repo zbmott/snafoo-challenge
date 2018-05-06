@@ -1,0 +1,18 @@
+[group:{{ app_name }}]
+programs=gunicorn{% if install_celery is defined and install_celery %},celery{% endif %}
+
+[program:gunicorn]
+command = /home/{{ app_name }}/gunicorn_start.sh                      ; Command to start app
+user = {{ app_name }}                                                 ; User to run as
+stdout_logfile = /home/{{ app_name }}/logs/gunicorn_supervisor.log    ; Where to write log messages
+redirect_stderr = true                                                ; Save stderr in the same log
+environment=LANG=en_US.UTF-8,LC_ALL=en_US.UTF-8                       ; Set UTF-8 as default encoding
+
+{% if install_celery is defined and install_celery %}
+[program:celery]
+command = {{ virtualenv_path }}/bin/celery worker -A {{ app_name }}.celery_app -l INFO
+user = {{ app_name }}
+stdout_logfile = /home/{{ app_name }}/logs/worker.log
+redirect_stderr = true
+environment=PYTHONPATH={{ app_root }}
+{% endif %}

@@ -1,0 +1,33 @@
+---
+
+ansible_ssh_user: "{{ vault_ansible_ssh_user }}"
+ansible_ssh_private_key_file: "keys/production.pem"
+
+
+is_production: true
+
+app_repository_version: "master"
+
+app_debug: "False"
+app_template_debug: "False"
+
+app_admins:
+  - ["'Zachary Mott'", "'zach.mott@gmail.com'"]
+
+# Used to configure both 'server_name' nginx directive and
+# local_settings.ALLOWED_HOSTS Django configuration parameter.
+app_nginx_server_names:
+  - "34.214.12.122"
+
+app_db_name: "snafoo_django"
+app_db_host: "localhost"
+app_db_password: "{{ vault_app_db_password }}"
+
+group_extra_settings:
+  - {key: 'SECRET_KEY', value: "{{ vault_django_secret_key }}"}
+  - {key: 'SNACK_BACKEND_API_KEY', value: "{{ vault_snack_backend_api_key }}"}
+
+group_apt_dependencies: []
+group_supervisor_tasks: []
+
+...
