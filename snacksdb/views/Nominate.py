@@ -5,14 +5,15 @@ __author__ = 'zach.mott@gmail.com'
 from django.contrib import messages
 from django.shortcuts import redirect
 from django.utils.translation import ugettext_lazy as _
-from django.views import generic
+from django.views.generic import FormView
 
 from snacksdb import forms
 from snacksdb.models import Nomination
 from snacksdb.utils import get_snack_source, SnackSourceException
 
 
-class Nominate(generic.FormView):
+class Nominate(FormView):
+    FormView = FormView  # Preserve reference for mocking during tests.
     DELIMITER = '--DELIM--'
 
     form_class = forms.NominationForm

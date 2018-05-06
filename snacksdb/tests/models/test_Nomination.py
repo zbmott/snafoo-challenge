@@ -13,6 +13,10 @@ from snacksdb.tests.factories import NominationFactory, UserFactory
 
 
 class NominationTestCase(TestCase):
+    def tearDown(self):
+        # Reset the cache after each test because other tests might use it.
+        Nomination._remaining_in_month_cache = {}
+
     def test_manager_this_month(self):
         """
         Test that the model manager knows a 'this_month' method, and that it returns
