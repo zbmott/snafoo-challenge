@@ -1,17 +1,17 @@
 SnacksDB
 ---
-This is a project I built in response to a Python coding challenge I was given while applying for an engineering position. It doubles as a nice portfolio piece.
+This is a project I built in response to a Python coding challenge I was given while applying for an engineering position. It doubles as a portfolio piece.
 
 I was to take approximately 10 hours to build a simple application that allowed users to vote on which snacks they wanted to eat in a particular month.
-- Users were allowed to place 3 votes per month.
-- Users were allowed to nominate one snack each month. The snack could either be brand new, or have been nominated in a previous month.
+- Users are allowed to place 3 votes per month.
+- Users are allowed to nominate one snack each month. The snack can either be brand new, or have been nominated in a previous month.
 
 Functional requirements
 ---
 - Two views, one for nominating snacks, and one for voting for snacks.
 - The vote view must contain the following elements:
   - A list of snacks that are purchased every month, regardless of voting.
-  - A list of snacks that are voted on each month. Each snack should display the number of votes received so far this month, the date ``that`` the snack was last purchased, and a button to allow the user to cast a vote for the snack.
+  - A list of snacks that are voted on each month. Each snack should display the number of votes received so far this month, the date that the snack was last purchased, and a button to allow the user to cast a vote for the snack.
   - The number of votes the user has remaining in the month.
 - The nominate view must contain the following elements:
   - A dropdown of snacks that have been previously nominated, but that haven't been nominated yet this month. This list should not include any snacks that are mandatory (i.e. purchased every month regardless of voting).
@@ -32,7 +32,7 @@ Non-functional requirements
 - Submission displays user-friendly error messages.
 - Submission employs semantically valid HTML 5.
 
-Discussion
+Brief discussion
 ---
 - I used Django to implement my solution, because that's the framework I have the most expertise with.
 - This solution implements approval-style voting, i.e. users can vote for the same snack multiple times.
@@ -45,5 +45,5 @@ Discussion
 
 Availability
 ---
-As of 2018-05-06, my submission can be found at [snacks.zbmott.net](http://snacks.zbmott.net). Authentication is required to access the voting interface. Ten test accounts are available:
-testuser1, testuser2, ..., testuser10. Each accounts password is the same as its username.
+As of 2018-05-06, my submission can be found at [http://snacks.zbmott.net/](http://snacks.zbmott.net/). Authentication is required to access the voting interface. Ten test accounts are available:
+``testuser1``, ``testuser2``, ``...``, ``testuser10``. Each account's password is the same as its username.
