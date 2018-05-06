@@ -187,6 +187,7 @@ class NominateTestCase(TestCase):
 
         response = view_instance.finalize_nomination(1001, 'Apples')
 
+        self.assertNotIn(user.pk, Nomination._remaining_in_month_cache)
         self.assertEqual(Nomination.objects.filter(snack_id=1001, user=user).count(), 1)
 
         self.assertEqual(response.status_code, 302)

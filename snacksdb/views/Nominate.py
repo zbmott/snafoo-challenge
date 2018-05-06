@@ -84,6 +84,12 @@ class Nominate(FormView):
         # Record the nomination locally.
         Nomination.objects.create(snack_id=snack_id, user=self.request.user)
 
+        # Clear the nomination count cache for this user.
+        try:
+            del Nomination._remaining_in_month_cache[self.request.user.pk]
+        except KeyError:
+            pass
+
         msg = _("Thanks for nominating {snack_name}! Great suggestion!")
         messages.success(self.request, msg.format(snack_name=snack_name))
 
