@@ -14,9 +14,19 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import include, path
+from django.urls import include, path, reverse_lazy
+from django.shortcuts import redirect
+
+
+def redirect_to_login(request):
+    return redirect("{login_url}?next={vote_url}".format(
+        login_url=reverse_lazy('login'),
+        vote_url=reverse_lazy('snacksdb:vote'),
+    ))
+
 
 urlpatterns = [
+    path('', redirect_to_login),
     path('accounts/', include('django.contrib.auth.urls')),
     path('admin/', admin.site.urls),
     path('snacks/', include('snacksdb.urls')),

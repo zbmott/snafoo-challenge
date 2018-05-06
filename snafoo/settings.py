@@ -152,3 +152,19 @@ SNACK_SOURCE_CLASS = 'snacksdb.utils.SnackAPISource.SnackAPISource'
 # +------------------------------------------------------------------------------------------------+
 
 from .local_settings import *
+
+# Add the EC2 instance's private IPv4 address to ALLOWED_HOSTS
+# so that health checks from the ALB will succeed.
+import requests
+
+# Amazon maintains a REST API for retrieving instance metadata.
+try:
+    response = requests.get('http://169.254.169.254/latest/meta-data/local-ipv4')
+except requests.exceptions.ConnectionError:
+    # If can't connect to the remote host, we're probably in a dev environment.
+    pass
+else:
+    # If the response isn't 200, maybe the server wasn't provisioned with AWS?
+    # Anyways, the request wasn't successful, so don't do anything with the response.
+    if response.status_code == 200:
+        ALLOWED_HOSTS.append(response.text) if response.text not in ALLOWED_HOSTS

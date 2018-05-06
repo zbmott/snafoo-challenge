@@ -18,6 +18,7 @@ app_admins:
 # local_settings.ALLOWED_HOSTS Django configuration parameter.
 app_nginx_server_names:
   - "34.214.12.122"
+  - "snacks.zbmott.net"
 
 app_db_name: "snafoo_django"
 app_db_host: "localhost"
