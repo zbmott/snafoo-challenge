@@ -4,6 +4,7 @@ __author__ = 'zach.mott@gmail.com'
 
 from unittest import mock
 
+from django.core.cache import cache
 from django.test import TestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
@@ -15,7 +16,16 @@ from snacksdb.views import Nominate
 
 
 class NominateTestCase(TestCase):
+    """
+    Test cases for snacksdb.views.Nominate.
+    """
     view_url = reverse('snacksdb:nominate')
+
+    def setUp(self):
+        # If the cache is set up, we need to clear it before running each test,
+        # so that cached results from previous tests don't interfer with the
+        # current test.
+        cache.clear()
 
     @mock.patch('snacksdb.views.Nominate.FormView.dispatch')
     def test_dispatch(self, mock_dispatch):
@@ -29,6 +39,9 @@ class NominateTestCase(TestCase):
             self.assertEqual(response['Location'], reverse('snacksdb:vote'))
             mock_dispatch.assert_not_called()
 
+        # Use a new user because the old one's monthly nomination count is cached.
+        mock_request.user = UserFactory()
+
         # Test that a user with nominations remaining proceeds to the view.
         with override_settings(NOMINATIONS_PER_MONTH=100):
             view_instance.dispatch(mock_request)
@@ -36,6 +49,10 @@ class NominateTestCase(TestCase):
             mock_dispatch.assert_called_with(mock_request)
 
     def test_nominate_existing(self):
+        """
+        Test that nominating an exsting snacks correctly creates a Nomination instance
+        and redirects the user back to 'snacksdb:vote'.
+        """
         user = UserFactory()
         self.client.force_login(user)
 
@@ -59,6 +76,10 @@ class NominateTestCase(TestCase):
 
     @mock.patch('snacksdb.utils.SnackAPISource.suggest')
     def test_nominate_new_success(self, mock_suggest):
+        """
+        Test that nominating a new snack correctly invokes AbstractSnackSource.suggest,
+        creates a Nomination instance, and redirects the user to 'snacksdb:vote'.
+        """
         user = UserFactory()
         self.client.force_login(user)
         mock_suggest.return_value = {'id': 1002, 'name': 'Bananas'}
@@ -78,6 +99,10 @@ class NominateTestCase(TestCase):
     @mock.patch('snacksdb.utils.SnackAPISource.list')
     @mock.patch('snacksdb.utils.SnackAPISource.suggest')
     def test_nominate_new_failure(self, mock_suggest, mock_list):
+        """
+        Test that nominating a new snack with invalid form data re-renders
+        the form with the validation errors.
+        """
         user = UserFactory()
         self.client.force_login(user)
         post_data = {
@@ -117,6 +142,10 @@ class NominateTestCase(TestCase):
 
     @mock.patch('snacksdb.utils.SnackAPISource.list')
     def test_get_unnominated_snacks(self, mock_list):
+        """
+        Test that Nominate.get_unnominated_snacks returns a list of optional
+        snacks that haven't been nominated yet this month.
+        """
         view_instance = Nominate()
         mock_list.return_value = [
             {'id': 1001, 'optional': True},
@@ -172,6 +201,10 @@ class NominateTestCase(TestCase):
         mock_fi.assert_not_called()
 
     def test_finalize_nomination(self):
+        """
+        Test that Nominate.finalize_nomination correctly creates a Nomination
+        instance and returns a redirect to 'snacksdb:vote'.
+        """
         user = UserFactory()
         view_instance = Nominate()
         view_instance.request = mock.MagicMock(user=user)

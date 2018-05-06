@@ -10,6 +10,9 @@ from snacksdb.utils import get_snack_source, SnackAPISource
 
 
 class UtilsTestCase(TestCase):
+    """
+    Test cases for functions defined in snacksdb/utils/__init__.py.
+    """
     @override_settings()
     def test_snack_source_AttributeError(self):
         # override_settings + 'del settings.SETTING_NAME' is how to delete

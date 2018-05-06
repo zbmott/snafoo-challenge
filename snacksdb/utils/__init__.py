@@ -14,6 +14,9 @@ from .SnackAPISource import SnackAPISource
 
 
 def get_snack_source():
+    """
+    Validate settings.SNACK_SOURCE_CLASS and, if valid, return an instance thereof.
+    """
     try:
         source_class = import_string(settings.SNACK_SOURCE_CLASS)
     except AttributeError:

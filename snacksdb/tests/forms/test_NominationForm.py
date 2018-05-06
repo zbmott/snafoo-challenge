@@ -8,7 +8,13 @@ from snacksdb.forms import NominationForm
 
 
 class NominationFormTestCase(TestCase):
+    """
+    Test cases for snacksdb.forms.NominationForm.
+    """
     def generate_test_data(self, **updates):
+        """
+        Helper method to succintly generate test form data.
+        """
         data = {
             'name': 'Apples',
             'location': "Barry's Corner Store"
@@ -19,6 +25,10 @@ class NominationFormTestCase(TestCase):
         return data
 
     def test_validation(self):
+        """
+        Functional test to verify acceptable permutations of
+        and values for 'latitude' and 'longitude'.
+        """
         test_cases = [
             # Both valid.
             {'latitude': '', 'longitude': '', 'valid': True},

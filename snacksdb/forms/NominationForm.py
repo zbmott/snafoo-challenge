@@ -11,6 +11,9 @@ from django.core.exceptions import ValidationError
 
 
 class NominationForm(forms.Form):
+    """
+    Form to represent and validate a snack nomination.
+    """
     name = forms.CharField(
         max_length=200, required=True,
         help_text=_('The name of the nominated snack.')
@@ -29,6 +32,9 @@ class NominationForm(forms.Form):
     )
 
     def clean_latitude(self):
+        """
+        If 'latitude' is a Decimal, it must be on the interval [-90, 90].
+        """
         latitude = self.cleaned_data['latitude']
 
         if isinstance(latitude, D) and (latitude < D('-90') or latitude > D('90')):
@@ -37,6 +43,9 @@ class NominationForm(forms.Form):
         return latitude
 
     def clean_longitude(self):
+        """
+        If 'longitude' is a Decimal, it must be on the interval [-180, 180].
+        """
         longitude = self.cleaned_data['longitude']
 
         if isinstance(longitude, D) and (longitude < D('-180') or longitude > D('180')):
@@ -45,9 +54,11 @@ class NominationForm(forms.Form):
         return longitude
 
     def clean(self):
+        """
+        'latitude' and 'longitude' must be provided together or not at all.
+        """
         cleaned_data = super().clean()
 
-        # It's invalid to have latitude without longitude, and vice-versa.
         have_latitude = isinstance(cleaned_data.get('latitude'), D)
         have_longitude = isinstance(cleaned_data.get('longitude'), D)
 

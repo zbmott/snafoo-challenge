@@ -10,6 +10,9 @@ from snacksdb.utils import SnackAPISource, SnackSourceException
 
 
 class SnackAPISourceTestCase(TestCase):
+    """
+    Test cases for snacksdb.utils.SnackAPISource.
+    """
     API_KEY = 'APIKEY'
 
     def setUp(self):
@@ -20,6 +23,9 @@ class SnackAPISourceTestCase(TestCase):
         self.location = 'Giant'
 
     def test___init__(self):
+        """
+        Test that SnackAPISource correctly determines its api_key and api_base.
+        """
         # Test 'api_key' parameter
         self.assertEqual(SnackAPISource(api_key='APIKEY').api_key, 'APIKEY')
 
@@ -36,6 +42,9 @@ class SnackAPISourceTestCase(TestCase):
             self.assertEqual(SnackAPISource().api_base, SnackAPISource.DEFAULT_API_BASE)
 
     def test_headers(self):
+        """
+        Test that SnackAPISource forms its Authorization header correctly.
+        """
         api_key = 'APIKEY'
         expected_headers = {'Authorization': "ApiKey {api_key}".format(api_key=api_key)}
 
@@ -47,7 +56,7 @@ class SnackAPISourceTestCase(TestCase):
     def _list_error(self, status_code, mock_get):
         """
         Fake a 'list snacks' GET request, have it return the given status
-        code, return the exception it raised. Helper method for testing
+        code, and return the exception it raised. Helper method for testing
         exception behavior in SnackAPISource.list.
         """
         mock_get.return_value = mock.MagicMock(status_code=status_code)
@@ -87,7 +96,7 @@ class SnackAPISourceTestCase(TestCase):
     def _post_error(self, status_code, mock_post):
         """
         Fake a 'nominate snack' POST request, have it return the given status
-        code, return the exception it raised. Helper method for testing
+        code, and return the exception it raised. Helper method for testing
         exception behavior in SnackAPISource.suggest.
         """
         mock_post.return_value = mock.MagicMock(status_code=status_code)
@@ -119,6 +128,12 @@ class SnackAPISourceTestCase(TestCase):
     @mock.patch('requests.post')
     @override_settings(SNACK_BACKEND_API_BASE=None, SNACK_BACKEND_API_KEY=API_KEY)
     def test_suggest_200(self, mock_post):
+        """
+        Test that SnackAPISource.suggest handles permutations of 'latitude'
+        and 'longitude' correctly. From the application's point of view,
+        NominationForm should ensure that invalid permuations don't get
+        sent to SnackAPISource.suggest.
+        """
         mock_post.return_value = mock.MagicMock(status_code=200)
 
         # 'included' indicates whether we expect latitude and

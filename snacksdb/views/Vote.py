@@ -20,13 +20,19 @@ from snacksdb.utils import get_snack_source, SnackSourceException
 
 @method_decorator(login_required, name='dispatch')
 class Vote(generic.TemplateView):
+    """
+    View for voting on nominated snacks.
+    """
     template_name = 'snacksdb/vote.html'
 
     def post(self, request, *pos, **kw):
+        # The UI should disallow users from placing more than their alloted
+        # votes each month, but here we enforce that restriction server-side.
         if (settings.VOTES_PER_MONTH -
                     Ballot.objects.this_month().filter(user=request.user).count() < 1):
             return HttpResponseForbidden(_("Nice try! You're out of votes for the month!"))
 
+        # 'snack_id' and 'snack_name' are both required when submitting a vote.
         if 'snack_id' not in request.POST:
             return HttpResponseBadRequest(_('POST data must contain "snack_id".'))
         if 'snack_name' not in request.POST:
@@ -58,7 +64,7 @@ class Vote(generic.TemplateView):
     def fetch_snacks(self):
         """
         Return a 2-tuple of snack lists: (mandatory_snacks, optional_snacks)
-        as determined by the Snack Food API.
+        as determined by the Snack source.
         """
         try:
             snack_list = get_snack_source().list()

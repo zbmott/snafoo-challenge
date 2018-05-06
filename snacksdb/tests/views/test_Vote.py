@@ -5,6 +5,7 @@ __author__ = 'zach.mott@gmail.com'
 import datetime
 from unittest import mock
 
+from django.core.cache import cache
 from django.test import TestCase, override_settings
 from django.urls import reverse
 
@@ -15,10 +16,22 @@ from snacksdb.views import Vote
 
 
 class VoteTestCase(TestCase):
+    """
+    Test cases for snacksdb.views.Vote.
+    """
     view_url = reverse('snacksdb:vote')
+
+    def setUp(self):
+        # If the cache is set up, we need to clear it before running each test,
+        # so that cached results from previous tests don't interfer with the
+        # current test.
+        cache.clear()
 
     @override_settings(VOTES_PER_MONTH=0)
     def test_post_too_many_votes(self):
+        """
+        Test that users who have no votes remaining this month can't place additional votes.
+        """
         self.client.force_login(UserFactory())
         response = self.client.post(
             reverse('snacksdb:vote'),
@@ -28,16 +41,26 @@ class VoteTestCase(TestCase):
         self.assertEqual(response.status_code, 403)
 
     def test_post_no_snack_id(self):
+        """
+        Test that 'snack_id' is a required value when submitting a new vote.
+        """
         self.client.force_login(UserFactory())
         response = self.client.post(self.view_url, {'snack_name': 'Apples'})
         self.assertEqual(response.status_code, 400)
 
     def test_post_no_snack_name(self):
+        """
+        Test that 'snack_name' is a required value when submitting a new vote.
+        """
         self.client.force_login(UserFactory())
         response = self.client.post(self.view_url, {'snack_id': 1002})
         self.assertEqual(response.status_code, 400)
 
     def test_post(self):
+        """
+        Test that POSTing a valid vote results in a Ballot being created and the
+        user being redirected back to 'snacksdb:vote'.
+        """
         user = UserFactory()
         self.client.force_login(user)
 
@@ -86,6 +109,13 @@ class VoteTestCase(TestCase):
 
     @mock.patch('snacksdb.utils.SnackAPISource.list')
     def test_fetch_snacks(self, mock_list):
+        """
+        Test that Vote.fetch_snacks returns a list of mandatory snacks and a
+        list of optional snacks, as determined by the snack source.
+
+        Test that if a SnackSourceException is raised, both of these lists
+        are empty.
+        """
         view_instance = Vote()
         view_instance.request = mock.MagicMock()
         mandatory_snacks = [{'id': 1001 + i, 'optional': False} for i in range(3)]
@@ -106,6 +136,12 @@ class VoteTestCase(TestCase):
         mock_list.assert_called_with()
 
     def test_postprocess_optional_snacks(self):
+        """
+        Test that Vote.postprocess_optional_snacks annonates a list of
+        optional snacks with the following information:
+          1) The total number of votes that snack has received this month.
+          2) Whether or not the current user voted for that snack this month.
+        """
         view_instance = Vote()
         user = UserFactory()
         optional_snacks = []
@@ -144,6 +180,10 @@ class VoteTestCase(TestCase):
         )
 
     def test_filter_unnominated_snacks(self):
+        """
+        Test that Vote.filter_unnominated_snacks removes snacks that haven't
+        been nominated yet this month from the list of optional snacks.
+        """
         view_instance = Vote()
         snacks = [{'id': 1001 + i} for i in range(4)]
 
@@ -161,6 +201,10 @@ class VoteTestCase(TestCase):
         ])
 
     def test_count_votes_by_snack(self):
+        """
+        Test that Vote.count_votes_by_snack returns a dictionary of
+        {snack_id: total_votes_this month, ...} for all snacks.
+        """
         view_instance = Vote()
         user = UserFactory()
 

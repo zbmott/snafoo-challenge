@@ -72,6 +72,19 @@ TEMPLATES = [
 WSGI_APPLICATION = 'snafoo.wsgi.application'
 
 
+# Cache
+# https://docs.djangoproject.com/en/2.0/topics/cache/
+# N.B.: If you have multiple request-handling threads, DO NOT use a
+# thread local cache backend (e.g. LocMemCache). MemCachedCache is
+# the recommended cache backend for a production instance.
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
+    }
+}
+
+
 # Database
 # https://docs.djangoproject.com/en/2.0/ref/settings/#databases
 

@@ -16,6 +16,9 @@ from snacksdb.utils import get_snack_source, SnackSourceException
 
 @method_decorator(login_required, name='dispatch')
 class Nominate(FormView):
+    """
+    View for nominating snacks to be voted upon.
+    """
     FormView = FormView  # Preserve reference for mocking during tests.
     DELIMITER = '--DELIM--'
 
@@ -23,10 +26,8 @@ class Nominate(FormView):
     template_name = 'snacksdb/nominate.html'
 
     def dispatch(self, request, *pos, **kw):
-        """
-        Check to see if the user is allowed to place a nomination before rendering
-        the page. If they're not, send them back to the Vote view.
-        """
+        # Check to see if the user is allowed to place a nomination before rendering
+        # the page. If they're not, send them back to the Vote view.
         if Nomination.remaining_in_month(request.user) < 1:
             msg = _("Sorry, you don't have any nominations left. Try again next month!")
             messages.warning(request, msg)
@@ -35,10 +36,12 @@ class Nominate(FormView):
         return super().dispatch(request, *pos, **kw)
 
     def post(self, request, *pos, **kw):
+        # If the user nominated an existing snack, finalize the nomination straight away.
         if request.POST.get('snack_id'):
             snack_id, snack_name = request.POST['snack_id'].split(self.DELIMITER)
             return self.finalize_nomination(snack_id, snack_name)
 
+        # Otherwise, process the form like normal.
         return super().post(request, *pos, **kw)
 
     def get_context_data(self, **kw):

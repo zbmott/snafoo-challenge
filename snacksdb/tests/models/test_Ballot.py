@@ -12,6 +12,9 @@ from snacksdb.tests.factories import BallotFactory
 
 
 class BallotTestCase(TestCase):
+    """
+    Test cases for snacksdb.models.Ballot.
+    """
     def test_manager_this_month(self):
         """
         Test that the model manager knows a 'this_month' method, and that it returns
@@ -28,14 +31,9 @@ class BallotTestCase(TestCase):
             BallotFactory(user=ballot1.user),
         ]
 
-        # Mock timezone.now() so that we can create Ballots in the past.
-        # DateTimeField.auto_now_add ALWAYS uses timezone.now(), even when
-        # you give your own value to the constructor.
-        with mock.patch('django.utils.timezone.now') as mock_now:
-            mock_now.return_value = end_of_last_month
-            BallotFactory()
-            mock_now.return_value = end_of_last_month - timedelta(days=100)
-            BallotFactory()
+        # Make some historical Ballots. These shouldn't be included in the count.
+        BallotFactory.make_in_the_past(end_of_last_month)
+        BallotFactory.make_in_the_past(end_of_last_month - timedelta(days=100))
 
         self.assertEqual(Ballot.objects.this_month().count(), len(expected_ballots))
 
