@@ -83,14 +83,14 @@ class Vote(generic.TemplateView):
         # Count total votes for each snack ID.
         votes_by_snack = self.count_votes_by_snack()
 
-        for snack in self.filter_unsuggested_snacks(optional_snacks):  # (1)
+        for snack in self.filter_unnominated_snacks(optional_snacks):  # (1)
             snack['total_votes'] = votes_by_snack.get(snack['id'], 0)  # (2)
             snack['received_vote'] = snack['id'] in voted_snack_ids  # (3)
             new_optional_snacks.append(snack)
 
         return sorted(new_optional_snacks, key=itemgetter('total_votes'), reverse=True)
 
-    def filter_unsuggested_snacks(self, snacks):
+    def filter_unnominated_snacks(self, snacks):
         """
         Filter out snacks that haven't been suggested yet this month.
         """

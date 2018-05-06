@@ -2,21 +2,21 @@
 
 __author__ = 'zach.mott@gmail.com'
 
-import pytz
 from unittest import mock
 
-from django.conf import settings
 from django.test import TestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
 
 from snacksdb.models import Nomination
 from snacksdb.tests.factories import NominationFactory, UserFactory
-from snacksdb.utils import SnackSourceException
+from snacksdb.utils import SnackSourceException, get_tzinfo
 from snacksdb.views import Nominate
 
 
 class NominateTestCase(TestCase):
+    view_url = reverse('snacksdb:nominate')
+
     def tearDown(self):
         # Reset the cache after each test because other tests might use it.
         Nomination._remaining_in_month_cache = {}
@@ -50,8 +50,14 @@ class NominateTestCase(TestCase):
         self.assertEqual(nomination_qs.count(), 0)
 
         response = self.client.post(
-            reverse('snacksdb:nominate'),
-            {'snack_id': "{id}{delim}{name}".format(id=1001, delim=Nominate.DELIMITER, name='Apples')}
+            self.view_url,
+            {
+                'snack_id': "{id}{delim}{name}".format(
+                    id=1001,
+                    delim=Nominate.DELIMITER,
+                    name='Apples'
+                ),
+            }
         )
 
         self.assertEqual(nomination_qs.count(), 1)
@@ -68,7 +74,7 @@ class NominateTestCase(TestCase):
         nomination_qs = Nomination.objects.filter(snack_id=1002, user=user)
         self.assertEqual(nomination_qs.count(), 0)
 
-        response = self.client.post(reverse('snacksdb:nominate'), post_data)
+        response = self.client.post(self.view_url, post_data)
 
         mock_suggest.assert_called_once()
         mock_suggest.assert_called_with(latitude=None, longitude=None, **post_data)
@@ -89,7 +95,7 @@ class NominateTestCase(TestCase):
         nomination_qs = Nomination.objects.filter(user=user)
         self.assertEqual(nomination_qs.count(), 0)
 
-        response = self.client.post(reverse('snacksdb:nominate'), post_data)
+        response = self.client.post(self.view_url, post_data)
 
         mock_suggest.assert_not_called()
         mock_list.assert_called_once()
@@ -130,10 +136,8 @@ class NominateTestCase(TestCase):
         NominationFactory(snack_id=1001)
 
         # Nominate an optional snack a year in the past. This one should be in the list.
-        with mock.patch('django.utils.timezone.now') as mock_now:
-            tz = pytz.timezone(settings.TIME_ZONE)
-            mock_now.return_value = timezone.datetime(2017, 1, 1, 0, 0, 0, tzinfo=tz)
-            NominationFactory(snack_id=1003)
+        when = timezone.datetime(2017, 1, 1, 0, 0, 0, tzinfo=get_tzinfo())
+        NominationFactory.make_in_the_past(when, snack_id=1003)
 
         # We should only get back snacks that aren't optional and haven't been nominated this month.
         expected_snacks = [

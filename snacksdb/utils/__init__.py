@@ -2,6 +2,8 @@
 
 __author__ = 'zach.mott@gmail.com'
 
+import pytz
+
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.utils.module_loading import import_string
@@ -28,3 +30,7 @@ def get_snack_source():
         raise ImproperlyConfigured(msg)
 
     return source_class()
+
+
+def get_tzinfo(tz_name=None):
+    return pytz.timezone(tz_name or settings.TIME_ZONE)
