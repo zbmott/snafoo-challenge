@@ -23,8 +23,6 @@ class Nomination(SnacksDBBase):
         help_text=_('ID of the nominated snack.'),
     )
 
-    _remaining_in_month_cache = {}
-
     def __str__(self):
         tmpl = ("{self.user.username} nominated snack {self.snack_id} "
                 "on {self.created:%Y-%m-%d %H:%M:%S}")
@@ -38,11 +36,8 @@ class Nomination(SnacksDBBase):
         if user.is_anonymous:
             return 0
 
-        # No need to compute this more than once per request.
-        if user.pk not in cls._remaining_in_month_cache:
-            user_nominations = cls.objects.this_month().filter(user=user)
-            nominations_left = max(0, settings.NOMINATIONS_PER_MONTH - user_nominations.count())
-            cls._remaining_in_month_cache[user.pk] = nominations_left
+        user_nominations = cls.objects.this_month().filter(user=user)
+        nominations_left = max(0, settings.NOMINATIONS_PER_MONTH - user_nominations.count())
 
-        return cls._remaining_in_month_cache[user.pk]
+        return nominations_left
 

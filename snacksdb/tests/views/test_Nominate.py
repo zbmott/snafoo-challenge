@@ -17,10 +17,6 @@ from snacksdb.views import Nominate
 class NominateTestCase(TestCase):
     view_url = reverse('snacksdb:nominate')
 
-    def tearDown(self):
-        # Reset the cache after each test because other tests might use it.
-        Nomination._remaining_in_month_cache = {}
-
     @mock.patch('snacksdb.views.Nominate.FormView.dispatch')
     def test_dispatch(self, mock_dispatch):
         view_instance = Nominate()
@@ -32,9 +28,6 @@ class NominateTestCase(TestCase):
             self.assertEqual(response.status_code, 302)
             self.assertEqual(response['Location'], reverse('snacksdb:vote'))
             mock_dispatch.assert_not_called()
-
-        # Update the user because of Nomination._remaining_in_month_cache.
-        mock_request.user = UserFactory()
 
         # Test that a user with nominations remaining proceeds to the view.
         with override_settings(NOMINATIONS_PER_MONTH=100):
@@ -187,7 +180,6 @@ class NominateTestCase(TestCase):
 
         response = view_instance.finalize_nomination(1001, 'Apples')
 
-        self.assertNotIn(user.pk, Nomination._remaining_in_month_cache)
         self.assertEqual(Nomination.objects.filter(snack_id=1001, user=user).count(), 1)
 
         self.assertEqual(response.status_code, 302)

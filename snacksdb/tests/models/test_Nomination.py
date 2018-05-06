@@ -13,10 +13,6 @@ from snacksdb.tests.factories import NominationFactory, UserFactory
 
 
 class NominationTestCase(TestCase):
-    def tearDown(self):
-        # Reset the cache after each test because other tests might use it.
-        Nomination._remaining_in_month_cache = {}
-
     def test_manager_this_month(self):
         """
         Test that the model manager knows a 'this_month' method, and that it returns
@@ -60,26 +56,12 @@ class NominationTestCase(TestCase):
         user1 = UserFactory()
         user2 = UserFactory()
 
-        self.assertDictEqual(Nomination._remaining_in_month_cache, {})
         self.assertEqual(Nomination.remaining_in_month(user1), 5)
         self.assertEqual(Nomination.remaining_in_month(user2), 5)
-
-        self.assertDictEqual(Nomination._remaining_in_month_cache, {
-            user1.pk: 5,
-            user2.pk: 5
-        })
 
         NominationFactory(user=user1)
-
-        # Haven't touched the cache yet.
-        self.assertEqual(Nomination.remaining_in_month(user1), 5)
-        self.assertEqual(Nomination.remaining_in_month(user2), 5)
-
         for i in range(5):
             NominationFactory(user=user2)
-
-        # Reset the cache
-        Nomination._remaining_in_month_cache = {}
 
         self.assertEqual(Nomination.remaining_in_month(user1), 4)
         self.assertEqual(Nomination.remaining_in_month(user2), 0)
